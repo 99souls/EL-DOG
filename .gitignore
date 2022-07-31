@@ -1,4 +1,3 @@
-.git-ignore
 config.py
 __pycache__
 keystore.py
