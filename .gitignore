@@ -1,3 +1,4 @@
-/.git-ignore
-/config.py
-/__pycache__
+.git-ignore
+config.py
+__pycache__
+keystore.py
