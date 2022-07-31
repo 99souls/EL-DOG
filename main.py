@@ -1,5 +1,5 @@
 import discord
-from config import token
+from tokenstore import token
 
 client = discord.Client()
 
