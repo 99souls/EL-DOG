@@ -36,7 +36,7 @@ async def link(ctx, *, args):
     randomIconID = random.randint(0,28)
     message1 = await ctx.send(f'change league icon to ``{icons[str(randomIconID)]}``')
     await message1.add_reaction('💜')
-    time.sleep(2)
+    time.sleep(5)
     @client.event
     async def on_raw_reaction_add(message1):
         user = Summoner(name = username, region = region)
@@ -44,7 +44,9 @@ async def link(ctx, *, args):
 
         if randomIconID == iconID:
             await ctx.send('ur fucking in cunt')
+            return
         else:
             await ctx.send('ur out')
+            return
     
 client.run(token)
