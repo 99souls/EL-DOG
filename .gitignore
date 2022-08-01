@@ -1,3 +1,5 @@
-tokenstore.py
 __pycache__
-keystore.py
+_keystore.py
+.gitignore
+__iconIDs.json
+__userdataStore.json
