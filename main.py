@@ -5,16 +5,17 @@ from cassiopeia import Summoner
 import json
 import random
 import time
-import uuid
+from database import postData
+from database import reqData
+from database import generateUID
 
 from _keystore import API_KEY
-from _keystore import token
+from _keystore import TOKEN
 
 cass.set_riot_api_key(API_KEY) # setting riot api key to key from keystore file
 
 
 intents = discord.Intents.default()
-intents.message_content = True
 client = commands.Bot(command_prefix='.', intents = intents) # setting command prefix
 
 # setting status to stream + rick roll 
@@ -34,30 +35,38 @@ async def on_command_error(ctx, error):
 
 @client.command()
 async def link(ctx, username, region):
-    print(username)
-    print(region)
     userID = ctx.author.id
     dm = ctx.author
-    try: await dm.send('fuck')
+    try:
+        with open('__iconIDs.json', 'r') as f:
+            icons = json.load(f)
+
+        randomIconID = random.randint(0,28)
+        message1 = await dm.send(f'change league icon to ``{icons[str(randomIconID)]}``')
+        print(1)
+        await message1.add_reaction('💜')
+        print(2)
+        @client.event
+        async def on_raw_reaction_add(payload):
+                print(3)
+                user = Summoner(name = username, region = region)
+                iconID = user.profile_icon.id
+                
+                if randomIconID == iconID:
+                    uid = generateUID()
+                    postData(username, region, userID, uid)
+        
+                    dataMsg = discord.Embed(title="verification successful", color=0x1fffd2)
+                    dataMsg.add_field(name="username", value=username, inline=False)
+                    dataMsg.add_field(name="region", value=region, inline=False)
+                    dataMsg.add_field(name="discord id", value=f"<@{userID}>", inline=False)
+                    dataMsg.add_field(name="uid", value=uid, inline=False)
+                    await dm.send(embed=dataMsg)
+                    return
+                else:
+                    await dm.send('verification failed')
+                    return
     except: await ctx.send('unable to send dm, check your privacy settings')
-    with open('__iconIDs.json', 'r') as f:
-        icons = json.load(f)
-
-    randomIconID = random.randint(0,28)
-    message1 = await ctx.send(f'change league icon to ``{icons[str(randomIconID)]}``')
-    await message1.add_reaction('💜')
-    time.sleep(5)
-    @client.event
-    async def on_raw_reaction_add(message1):
-        user = Summoner(name = username, region = region)
-        iconID = user.profile_icon.id
-
-        if randomIconID == iconID:
-            await ctx.send('ur fucking in cunt')
-            return
-        else:
-            await ctx.send('ur out')
-            return
 
 @client.command()
 async def icon(ctx, id):
@@ -66,34 +75,24 @@ async def icon(ctx, id):
         await ctx.send(json.dumps(icons[id]))
         
 @client.command()
+@commands.has_permissions(administrator = True)
 async def submit(ctx, username, region):
-    with open('__userdataStore.json', 'a+', newline = '\r\n') as userdataFile:
-        user = ctx.author.id
-        uid = uuid.uuid4()
-        uid = str(uid)
-        userinfo = { username : {
-            "region" : region,
-            "discordID" : user,
-            "uid" : uid
-        }
-        }
-        json.dump(userinfo, userdataFile, ensure_ascii=False, indent=4, sort_keys=True)
-        await ctx.send(userinfo)
-        
+    user = ctx.author.id
+    uid = generateUID()
+    
+    postData(username, region, user, uid)
+    
+    dataMsg = discord.Embed(title="user data", color=0x1fffd2)
+    dataMsg.add_field(name="username", value=username, inline=False)
+    dataMsg.add_field(name="region", value=region, inline=False)
+    dataMsg.add_field(name="discord id", value=f"<@{user}>", inline=False)
+    dataMsg.add_field(name="uid", value=uid, inline=False)
+    await ctx.send(embed=dataMsg)
+                
+                
         
 @client.command()
-async def find(ctx, username):
-    with open('__userdataStore.json', 'r') as userdataFile:
-    #    csv_reader = csv.reader(userdataFile, delimiter = ',')
-        for line in userdataFile:
-            line = line.split(',')
-            if line[1] == username:
-                userid = line[0]
-                # userid = userid[:-2]
-                await ctx.send(f'{username} is linked to <@{userid}>')
-                return
-            else:
-                await ctx.send('that account has not been linked')
-                return
+async def get(ctx, id, field="nil"):
+    await reqData(ctx, id, field)
 
-client.run(token)
+client.run(TOKEN)
