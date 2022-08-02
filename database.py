@@ -3,11 +3,12 @@ from firebase_admin import credentials
 from firebase_admin import db
 import discord
 from _keystore import FB_KEY
+from _keystore import URL
 
 
 cred = credentials.Certificate(FB_KEY)
 firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://el-dog-default-rtdb.europe-west1.firebasedatabase.app/'
+    'databaseURL': URL
 
 })
 ref = db.reference("/")
