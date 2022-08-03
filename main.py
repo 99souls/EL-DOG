@@ -11,33 +11,34 @@ from database import postData, reqData, checkUserExists
 from _keystore import API_KEY
 from _keystore import TOKEN
 
-cass.set_riot_api_key(API_KEY) # setting riot api key to key from keystore file
+cass.set_riot_api_key(API_KEY)
 
 
 intents = discord.Intents.default()
 client = commands.Bot(command_prefix='.', intents = intents) # setting command prefix
 DiscordComponents(client)
 
-# setting status to stream + rick roll 
-
+def createSuccessEmbed(username, region, userID):
+    dataMsg = discord.Embed(title='verification successful', color=0x1fffd2)
+    dataMsg.add_field(name='username', value=username, inline=False)
+    dataMsg.add_field(name='region', value=region, inline=False)
+    dataMsg.add_field(name='discord id', value=f'<@{userID}>', inline=False)
+    return dataMsg
 
 async def checkIcon(interaction, username, region, userID, user, randomIcon):
     iconID = user.profile_icon.id
     print(iconID)
+    print(randomIcon)
     if randomIcon == iconID:
-        print('a5')
+        print('verify success')
         postData(username, region, userID)
-        dataMsg = discord.Embed(title='verification successful', color=0x1fffd2)
-        dataMsg.add_field(name='username', value=username, inline=False)
-        dataMsg.add_field(name='region', value=region, inline=False)
-        dataMsg.add_field(name='discord id', value=f'<@{userID}>', inline=False)
-        await interaction.send(embed = dataMsg)
-        print('b5')
+        print('posted data to firebase')
+        await interaction.send(embed = createSuccessEmbed(username, region, userID))
+        print('sent embed message')
         return
     else:
-        print('c5')
+        print('failed to verify')
         await interaction.send('verification failed')
-        print('d5')
         return
 
 
@@ -62,18 +63,19 @@ async def link(ctx, username, region):
     userID = ctx.author.id
     dm = ctx.author
     try: 
-        print('a')
-        await ctx.send(checkUserExists(username, region))
-        print('b')
+        # print('a')
+        # await ctx.send(checkUserExists(username, region))
+        # print('b')
         print(checkUserExists(username, region))
         print('c')
     except:
         try:
             with open('__iconIDs.json', 'r') as f:
                 icons = json.load(f)
+            print('opened icon ids file')
 
             randomIconID = random.randint(0,28)
-            print('icon id generated')
+            print('random id generated')
             
             await dm.send(
                 f'change league icon to ``{icons[str(randomIconID)]}``',
@@ -81,14 +83,14 @@ async def link(ctx, username, region):
                     Button(label = '🐬', custom_id = 'button1', style = 1)
                 ],
             )
-            
-            print('a1')
-            interaction = await client.wait_for('button_click', check = lambda i: i.custom_id == 'button1')
-            print('b1')
-            user = Summoner(name = username, region = region)
 
+            print('dm sent + waiting for button click')
+            interaction = await client.wait_for('button_click', check = lambda i: i.custom_id == 'button1')
+            print('button clicked')
+            user = Summoner(name = username, region = region)
+            print('fetched user details')
             await checkIcon(interaction, username, region, userID, user, randomIconID)
-        
+
         except: 
             await ctx.send('something went wrong... make sure to check your privacy settings')
 

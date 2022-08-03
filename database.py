@@ -49,12 +49,14 @@ async def reqData(ctx, username, region, field):
     except: await ctx.send('user is not linked')
     
 def checkUserExists(username, region):
-    try:
-        key = region + ":" + username
-        print('a2')
-        ref.child(key).get()
-    except:
-        return 'account is already linked'
+    # try:
+    key = region + ":" + username
+    print('created key')
+    print(ref.child(key).get())
+    print('user is already linked')
+    # except:
+    #     print('exception arose')
+    #     return 'account is already linked'
             
 # def generateUID():
 #     x = ref.order_by_key().limit_to_last(1).get()
