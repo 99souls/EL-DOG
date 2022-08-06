@@ -66,7 +66,8 @@ async def link(ctx, username, region):
         # print('a')
         # await ctx.send(checkUserExists(username, region))
         # print('b')
-        print(checkUserExists(username, region))
+        # print(checkUserExists(username, region))
+        checkUserExists(username, region)
         print('c')
     except:
         try:
@@ -121,3 +122,4 @@ async def get(ctx, username, region, field='nil'):
 
 client.run(TOKEN)
 
+# coc
